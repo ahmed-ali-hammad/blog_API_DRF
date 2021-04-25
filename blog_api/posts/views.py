@@ -1,21 +1,23 @@
-from rest_framework import generics, views, response
-from rest_framework.parsers import MultiPartParser, FormParser
 from .pagination import PostPageNumberPagination, PostLimitOffsetPagination
-from django.db.models import Q
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework import generics, views, response
 from rest_framework.permissions import *
-from .models import *
+from rest_framework import filters
+from django.db.models import Q
 from .serializers import *
 from .permissions import *
-from rest_framework import filters
+from .models import *
+
 
 
 class PostListAPIView(generics.ListAPIView):
     serializer_class = PostSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     filter_backends = [filters.SearchFilter]
     search_fields = ["user__username", "title", "content"]
     pagination_class = PostLimitOffsetPagination
 
+    # custom queryset to apply some custom filters
     def get_queryset(self, *args, **kwargs):
         queryset = Post.objects.all()
         query = self.request.GET.get("q")
@@ -57,6 +59,7 @@ class PostCreateAPIView(generics.CreateAPIView):
     parser_classes = [MultiPartParser, FormParser]
     permission_classes = [IsAuthenticated]
 
+    # to get the active user using the request data
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
@@ -64,3 +67,4 @@ class PostCreateAPIView(generics.CreateAPIView):
 class PostDeleteAPIView(generics.DestroyAPIView):
     queryset = Post.objects.all()
     lookup_field = "slug"
+    permission_classes = [IsAuthenticated, IsOwner]

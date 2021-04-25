@@ -1,10 +1,11 @@
-from django.contrib.auth.models import User
-from django.urls import reverse
-from django.template.defaultfilters import slugify
 from django.contrib.contenttypes.fields import GenericRelation
+from django.template.defaultfilters import slugify
 from django.db.models.signals import pre_save
-from django.db import models
+from django.contrib.auth.models import User
 from comments.models import Comment
+from django.urls import reverse
+from django.db import models
+
 
 
 class Post(models.Model):
@@ -12,7 +13,7 @@ class Post(models.Model):
     title = models.CharField(max_length=100)
     content = models.TextField()
     image = models.ImageField(null=True, blank=True)
-    comment = GenericRelation(Comment)
+    comment = GenericRelation(Comment) # since we used generic foreignkey in the Comment model
     slug = models.SlugField(unique=True, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -28,7 +29,7 @@ class Post(models.Model):
         verbose_name = "Post"
         verbose_name_plural = "Posts"
 
-
+# a function used to generate a unique slug for each instance
 def slug_generator(instance, **kwargs):
     if instance.slug:
         pass
@@ -45,5 +46,5 @@ def slug_generator(instance, **kwargs):
                 )
     return instance.slug
 
-
+# to save the slug prior to saving the instance
 pre_save.connect(slug_generator, sender=Post)

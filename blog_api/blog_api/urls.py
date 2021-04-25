@@ -8,8 +8,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('posts/', include('posts.urls', namespace = "posts")),
     path('comments/', include('comments.urls', namespace = 'comments')),
+    path('users/', include('users.urls', namespace = 'users')),
 ]
 
 
-if settings.DEBUG:
+# to serve the static files during developement
+if settings.DEBUG: 
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
